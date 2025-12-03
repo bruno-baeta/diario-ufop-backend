@@ -190,9 +190,11 @@ function buildFinal(schedules, names) {
         // 3️⃣ Merge para exibir melhor
         const merged = mergeTimes(schedules[code]);
 
+        const capitalizedName = formatSubjectName(names[code]);
+
         final.push({
             code,
-            name: names[code] ?? code,
+            name: capitalizedName ?? code,
             credits: realCredits,
             maxAbsences,
             weekSchedules: merged.length,
@@ -257,6 +259,32 @@ ${JSON.stringify(result, null, 2)}
 `;
 }
 
+function formatSubjectName(name) {
+    if (!name) return name;
+
+    // Palavras que ficam minúsculas no meio
+    const lowerWords = ["de", "da", "do", "das", "dos", "e", "em", "para"];
+
+    return name
+        .toLowerCase()
+        .split(" ")
+        .map((word, index) => {
+            // Se for numeral romano (I, II, III, IV...)
+            if (/^(i|ii|iii|iv|v|vi|vii|viii|ix|x)$/i.test(word)) {
+                return word.toUpperCase();
+            }
+
+            // Se for palavra curta de ligação e não for a primeira palavra
+            if (index !== 0 && lowerWords.includes(word)) {
+                return word;
+            }
+
+            // Caso normal → capitaliza
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        })
+        .join(" ");
+}
+
 /* ============================================================
    7) ROTA FINAL
 ============================================================ */
@@ -281,6 +309,7 @@ app.post("/parse", upload.single("file"), async (req, res) => {
         return res.json(result);
     });
 });
+
 
 /* ============================================================
    8) START SERVER
