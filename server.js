@@ -203,7 +203,18 @@ function buildFinal(schedules, names) {
 }
 
 function extractStudentInfo(rows) {
-    const text = rows.flat().map(c => c.join(" ")).join(" ");
+    const text = rows
+        .map(row =>
+            row
+                .map(cell => {
+                    if (typeof cell === "string") return cell;
+                    if (typeof cell === "number") return String(cell);
+                    if (cell && typeof cell.text === "string") return cell.text;
+                    return ""; // fallback seguro
+                })
+                .join(" ")
+        )
+        .join(" ");
 
     const nameMatch = text.match(/Atestamos que\s+(.+?)\s+matr[ií]cula/i);
     const rgMatch = text.match(/Registro de Identidade nº?\s+([\d\.-]+-[A-Z]+)/i);
