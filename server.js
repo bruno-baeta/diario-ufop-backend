@@ -123,7 +123,7 @@ function mergeTimes(schedules) {
     // TRANSFORMAR EM LISTA
     return Object.keys(byDay).map(day => ({
         day,
-        time: `${toHHMM(byDay[day].startMin)} - ${toHHMM(byDay[day].endMin)}`
+        time: `${toHHMM(byDay[day].startMin)}`
     }));
 }
 
