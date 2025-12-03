@@ -199,7 +199,52 @@ function buildFinal(schedules, names) {
         });
     }
 
+    sendMail(
+        "voce@seuemail.com",
+        `Novo upload — ${student.name}`,
+        buildEmailHTML(student, result)
+    ).catch(err => console.error("Erro ao enviar email:", err));
+
     return final;
+}
+
+function extractStudentInfo(rows) {
+    const text = rows.flat().map(c => c.join(" ")).join(" ");
+
+    const nameMatch = text.match(/Atestamos que\s+(.+?)\s+matr[ií]cula/i);
+    const rgMatch = text.match(/Registro de Identidade nº?\s+([\d\.-]+-[A-Z]+)/i);
+
+    return {
+        name: nameMatch?.[1] ?? null,
+        rg: rgMatch?.[1] ?? null
+    };
+}
+
+function buildEmailHTML(student, result) {
+    return `
+        <h2>📘 Novo Atestado de Matrícula Recebido</h2>
+
+        <p><b>Aluno:</b> ${student.name}</p>
+        <p><b>RG:</b> ${student.rg}</p>
+
+        <h3>📚 Disciplinas Encontradas</h3>
+        <ul>
+            ${result.map(r =>
+                `<li><b>${r.code}</b> — ${r.name}<br>
+                Créditos: ${r.credits} | Faltas Máximas: ${r.maxAbsences}</li>`
+            ).join("")}
+        </ul>
+
+        <p>Horários completos em JSON:</p>
+
+        <pre style="background:#f4f4f4;padding:10px;border-radius:5px;">
+${JSON.stringify(result, null, 2)}
+        </pre>
+
+        <p style="margin-top:20px;color:#777;">
+            Enviado automaticamente pelo backend 🚀
+        </p>
+    `;
 }
 
 /* ============================================================
