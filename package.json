@@ -13,6 +13,7 @@
   "dependencies": {
     "express": "^5.2.1",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.11",
     "pdf2table": "^0.0.2"
   }
 }

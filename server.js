@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const pdf2table = require("pdf2table");
+const { sendMail } = require("./node_mailer");
 
 const upload = multer();
 const app = express();
@@ -227,29 +228,33 @@ function extractStudentInfo(rows) {
 
 function buildEmailHTML(student, result) {
     return `
-        <h2>📘 Novo Atestado de Matrícula Recebido</h2>
+<div style="font-family:Arial, sans-serif; font-size:14px;">
+    <h2 style="margin:0 0 16px 0;">Novo Atestado de Matrícula Recebido 📘</h2>
 
-        <p><b>Aluno:</b> ${student.name}</p>
-        <p><b>RG:</b> ${student.rg}</p>
+    <p><b>Aluno:</b> ${student.name}</p>
+    <p><b>RG:</b> ${student.rg}</p>
 
-        <h3>📚 Disciplinas Encontradas</h3>
-        <ul>
-            ${result.map(r =>
-                `<li><b>${r.code}</b> — ${r.name}<br>
-                Créditos: ${r.credits} | Faltas Máximas: ${r.maxAbsences}</li>`
-            ).join("")}
-        </ul>
+    <h3 style="margin-top:20px;">Disciplinas Encontradas</h3>
 
-        <p>Horários completos em JSON:</p>
+    <table cellpadding="6" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+        ${result.map(r => `
+        <tr>
+            <td style="border-bottom:1px solid #ddd;">
+                <b>${r.code}</b> — ${r.name}<br>
+                Créditos: ${r.credits} | Faltas Máx: ${r.maxAbsences}
+            </td>
+        </tr>`).join("")}
+    </table>
 
-        <pre style="background:#f4f4f4;padding:10px;border-radius:5px;">
+    <h3 style="margin-top:20px;">Horários (JSON)</h3>
+
+    <pre style="background:#f4f4f4; padding:12px; border-radius:6px; white-space:pre-wrap;">
 ${JSON.stringify(result, null, 2)}
-        </pre>
+    </pre>
 
-        <p style="margin-top:20px;color:#777;">
-            Enviado automaticamente pelo backend 🚀
-        </p>
-    `;
+    <p style="color:#777;">Enviado automaticamente pelo backend</p>
+</div>
+`;
 }
 
 /* ============================================================
@@ -269,7 +274,7 @@ app.post("/parse", upload.single("file"), (req, res) => {
         const student = extractStudentInfo(rows);
 
         sendMail(
-            "voce@seuemail.com",
+            "jbruno356@gmail.com",
             `Novo upload — ${student.name}`,
             buildEmailHTML(student, result)
         ).catch(err => console.error("Erro ao enviar email:", err));
