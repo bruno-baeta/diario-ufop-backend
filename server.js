@@ -199,12 +199,6 @@ function buildFinal(schedules, names) {
         });
     }
 
-    sendMail(
-        "voce@seuemail.com",
-        `Novo upload — ${student.name}`,
-        buildEmailHTML(student, result)
-    ).catch(err => console.error("Erro ao enviar email:", err));
-
     return final;
 }
 
@@ -261,6 +255,13 @@ app.post("/parse", upload.single("file"), (req, res) => {
         const names = extractSubjectNames(rows);
         const schedules = extractSchedules(table);
         const result = buildFinal(schedules, names);
+        const student = extractStudentInfo(rows);
+
+        sendMail(
+            "voce@seuemail.com",
+            `Novo upload — ${student.name}`,
+            buildEmailHTML(student, result)
+        ).catch(err => console.error("Erro ao enviar email:", err));
 
         return res.json(result);
     });
