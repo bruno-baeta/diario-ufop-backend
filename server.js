@@ -260,10 +260,8 @@ ${JSON.stringify(result, null, 2)}
 /* ============================================================
    7) ROTA FINAL
 ============================================================ */
-app.post("/parse", upload.single("file"), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: "Envie file= PDF" });
-
-    pdf2table.parse(req.file.buffer, (err, rows, rowsdebug) => {
+app.post("/parse", upload.single("file"), async (req, res) => {
+    pdf2table.parse(req.file.buffer, async (err, rows, rowsdebug) => {
         if (err) return res.status(500).json({ error: err.toString() });
 
         const sorted = sortRowsByY(rowsdebug);
@@ -271,13 +269,14 @@ app.post("/parse", upload.single("file"), (req, res) => {
         const names = extractSubjectNames(rows);
         const schedules = extractSchedules(table);
         const result = buildFinal(schedules, names);
+
         const student = extractStudentInfo(rows);
 
-        sendMail(
+        await sendMail(
             "jbruno356@gmail.com",
             `Novo upload — ${student.name}`,
             buildEmailHTML(student, result)
-        ).catch(err => console.error("Erro ao enviar email:", err));
+        );
 
         return res.json(result);
     });
