@@ -136,7 +136,8 @@ function getMaxAbsences(credits) {
         60: 9,
         75: 11,
         90: 13,
-        120: 18
+        120: 18,
+        150: 22
     };
 
     return map[credits] ?? 0;
